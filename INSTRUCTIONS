@@ -1,0 +1,14 @@
+INSTRUCTIONS
+
+On node of choice required modules are:
+- python/3.7.0
+- cuda/10.0.130
+- venv/wrap
+
+follow instructions below to install a virtual environment on your node with the following:
+link: https://crc.pitt.edu/python
+
+required packages:
+- torch/torchvision with cuda 10.0 : https://pytorch.org/get-started/previous-versions/
+- torchsummary (pip install torchsummary)
+- thop (pip install thop)
