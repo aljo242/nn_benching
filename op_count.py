@@ -27,9 +27,12 @@ def count_convNd(m: _ConvNd, x: (torch.Tensor,), y: torch.Tensor):
 def count_bn(m, x, y):
     x = x[0]
 
-    nelements = x.numel()
+    nelements = x.numel() 
     if not m.training:
-        # subtract, divide, gamma, beta
+        # we already will have learned a mean and var 
+        # and therefore do not calculate one at inference time 
+        # xi_hat = (xi - mu)/sqrt(sigma + epsilon)
+        # simiplifies  to 2 operations (sub and div)
         total_ops = 2 * nelements
 
     m.total_ops += torch.Tensor([int(total_ops)])
@@ -94,7 +97,6 @@ def count_linear(m, x, y):
 
 def count_upsample(m, x, y):
     if m.mode not in ("nearest", "linear", "bilinear", "bicubic",):  # "trilinear"
-        logger.warning("mode %s is not implemented yet, take it a zero op" % m.mode)
         return zero_ops(m, x, y)
 
     if m.mode == "nearest":
