@@ -46,7 +46,7 @@ register_hooks = {
     nn.AdaptiveAvgPool2d: count_adap_avgpool,
     nn.AdaptiveAvgPool3d: count_adap_avgpool,
 
-    nn.Linear: count_linear,
+    nn.Linear: count_fullyConnected,
     nn.Dropout: zero_ops,
 
     nn.Upsample: count_upsample,

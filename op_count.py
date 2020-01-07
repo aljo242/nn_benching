@@ -84,13 +84,15 @@ def count_adap_avgpool(m, x, y):
     m.total_ops += torch.Tensor([int(total_ops)])
 
 
-def count_linear(m, x, y):
-    # per output element
+# in PyTorch we call FC layers linear
+def count_fullyConnected(m, x, y):
+	# one add and one mul per input node
     total_mul = m.in_features
     total_add = m.in_features - 1
     total_add += 1 if m.bias is not None else 0
-    num_elements = y.numel()
-    total_ops = (total_mul + total_add) * num_elements
+    output_size = y.numel()
+    # each input node is connected (output_size) times 
+    total_ops = (total_mul + total_add) * output_size
 
     m.total_ops += torch.Tensor([int(total_ops)])
 
