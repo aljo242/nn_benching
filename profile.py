@@ -8,8 +8,6 @@ from torch.nn.modules.conv import _ConvNd
 
 from op_count import *
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 register_hooks = {
     nn.Conv1d: count_convNd,
@@ -62,12 +60,8 @@ def profile(model, inputs, custom_ops=None, verbose=True):
 
     def add_hooks(m):
         if len(list(m.children())) > 0:
-            return
-
-        if hasattr(m, "total_ops") or hasattr(m, "total_params"):
-            logger.warning("Either .total_ops or .total_params is already defined in %s. "
-                           "Be careful, it might change your code's behavior." % str(m))
-
+            return 
+            
         m.register_buffer('total_ops', torch.zeros(1))
         m.register_buffer('total_params', torch.zeros(1))
 
@@ -80,13 +74,7 @@ def profile(model, inputs, custom_ops=None, verbose=True):
             fn = custom_ops[m_type]
         elif m_type in register_hooks:
             fn = register_hooks[m_type]
-
-        if fn is None:
-            if verbose:
-                logger.info("THOP has not implemented counting method for ", m)
         else:
-            if verbose:
-                logger.info("Register FLOP counter for module %s" % str(m))
             handler = m.register_forward_hook(fn)
             handler_collection.append(handler)
 

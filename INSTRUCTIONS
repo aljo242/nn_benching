@@ -11,3 +11,4 @@ link: https://crc.pitt.edu/python
 required packages:
 - torch/torchvision with cuda 10.0 : https://pytorch.org/get-started/previous-versions/
 - torchsummary (pip install torchsummary)
+- thop (pip install thop)
