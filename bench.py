@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torch
 import torch.onnx
 from torchsummary import summary
-from thop import profile
+from profile import profile
 
 import time
 import os
@@ -133,6 +133,7 @@ def get_ImageNet(transform):
     print("Checking if files need to be renamed...")
     for root, subdirs, files in os.walk(test_dir):
         for file in files:
+
             if os.path.splitext(file)[1] in ( '.JPEG', ".JPG"):
                 og = os.path.join(root, file)
                 print(og)
@@ -144,7 +145,6 @@ def get_ImageNet(transform):
     test = datasets.ImageFolder(test_dir, transform)
     return test
 
-    return [dataset, test_dataset]
 
 
 if __name__ == "__main__":
