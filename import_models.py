@@ -21,6 +21,8 @@ def import_models(download):
     print("This may take a while.  Progress will be shown if models are being downloaded.\n ")
 
     ############################################################################################
+    # Image Classification
+
     alexnet = models.alexnet(pretrained=download, progress=True)
 
     squeezenet1_0 = models.squeezenet1_0(pretrained=download, progress=True)
@@ -63,12 +65,36 @@ def import_models(download):
     #mnasnet1_3 = models.mnasnet1_3(pretrained=download, progress=True)
 
     ###########################################################################################
+    # Video Classification
+    resnet_3d = models.video.r3d_18(pretrained=download, progress=True, **kwargs)
+    resnet_mixed_conv = torchvision.models.video.mc3_18(pretrained=download, progress=True, **kwargs)
+    resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True, **kwargs)
+
+    ###########################################################################################
+    # Object Detection
+
+    fasterrcnn_resnet50 = models.detection.fasterrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True, **kwargs)
+    maskcnn_resnet50 = models.detection.maskrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True, **kwargs)
+    keypointrcnn_resnet50 = models.detection.keypointrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=2, num_keypoints=17, pretrained_backbone=True, **kwargs)
+
+    ###########################################################################################
+    # Semantic Segmentation
+
+    fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+    fcn_resnet101 = models.segmentation.fcn_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+
+    deeplabv3_resnet50 = models.segmentation.deeplabv3_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+    deeplabv3_resnet101 = models.segmentation.deeplabv3_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+
+    ###########################################################################################
 
 
     checking_input = True
     while (checking_input):
-        model_type = int(input("Choose the type of model you want:\n1 (CNN)\n2 (Fully Connected)\n3 (Object Detection)\nInput:\n4 (Semantic Segmentation)\nInput: "))
+        model_type = int(input("Choose the type of model you want:\n1 (Image Classification)\n2 (Video Classification)\n3 (Object Detection)\nInput:\n4 (Semantic Segmentation)\nInput: "))
         print(model_type)
+
+        # Convolutional Neual Networks
         if model_type == 1:
             models_dict = {
                 "alexnet" : alexnet,
@@ -106,7 +132,7 @@ def import_models(download):
 
             return models_dict
 
-
+        # Fully Connected
         elif model_type == 2:
             checking_input = False
 
@@ -115,7 +141,7 @@ def import_models(download):
             }
             return models_dict
 
-
+        # Object Detection
         elif model_type == 3:
             checking_input = False
 
@@ -124,6 +150,7 @@ def import_models(download):
             }
             return models_dict
 
+        # Semantic Segmentation
         elif model_type == 4:
             checking_input = False
 
