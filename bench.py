@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torch
 import torch.onnx
 from torchsummary import summary
-from profile import profile
+from thop import profile
 from import_models import import_models
 
 import time
@@ -33,6 +33,7 @@ def select_model(models_dict):
     exit()
 
 
+
 def get_ImageNet(transform):
     #dataset = datasets.ImageNet(root='data/ImageNet/', download=True)
     #test_dataset = datasets.ImageNet(root='data/ImageNet', train=False, transform=transform)
@@ -44,7 +45,6 @@ def get_ImageNet(transform):
     print("Checking if files need to be renamed...")
     for root, subdirs, files in os.walk(test_dir):
         for file in files:
-
             if os.path.splitext(file)[1] in ( '.JPEG', ".JPG"):
                 og = os.path.join(root, file)
                 print(og)
@@ -56,9 +56,11 @@ def get_ImageNet(transform):
     test = datasets.ImageFolder(test_dir, transform)
     return test
 
+    return [dataset, test_dataset]
 
 
 if __name__ == "__main__":
+
     [device, device_name] = get_default_device() 
     if device_name == None:
         device_name = 'CPU'
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     SHUFFLE = True
     NUM_WORKERS = 1
     crop_size = 224
-    download = False # flag to download pretrained weights
+    download = True # flag to download pretrained weights
 
     transform = transforms.Compose([
     	transforms.RandomResizedCrop(crop_size),
@@ -86,7 +88,6 @@ if __name__ == "__main__":
     All models trained on Imagenet (3, 224, 224).  This will be their default input shapes.
     EXCEPT for inception_v3 as noted above.  Will need to be reshaped.
     """
-
     models_dict = import_models(download)
     [model, model_name]  = select_model(models_dict)
     logger_name = "logs/" + model_name + '_' + device_name +'.log'
@@ -118,7 +119,7 @@ if __name__ == "__main__":
             elif counter == 1: 
                 out = model(xb)
 
-    summary(model, input_size = (3, 224, 224))
+    #summary(model, input_size = (3, 224, 224))
     profile_input = torch.randn(1, 3, 224, 224)
     to_device(profile_input, cpu, True)
     to_device(model, cpu, True)
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     if not os.path.exists(onnx_model_name):
         print(f"Saving Model to onnx format... {onnx_model_name}\n")
         logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
-        torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=10
+        torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
         , input_names = ['input'], output_names = ['output'])
         print(f"successfully Saved!\n")
         logging.warning(f"Successfully Saved!\n")

@@ -4,6 +4,10 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 import torch
 
+from models_dir.p_s_s.models import duc_hdc, fcn8s, fcn16s, fcn32s, gcn, psp_net, seg_net, u_net
+
+
+
 def import_models(download):
     
     """
@@ -66,32 +70,37 @@ def import_models(download):
 
     ###########################################################################################
     # Video Classification
-    resnet_3d = models.video.r3d_18(pretrained=download, progress=True, **kwargs)
-    resnet_mixed_conv = torchvision.models.video.mc3_18(pretrained=download, progress=True, **kwargs)
-    resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True, **kwargs)
+    resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
+    resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
+    resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
 
     ###########################################################################################
     # Object Detection
 
-    fasterrcnn_resnet50 = models.detection.fasterrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True, **kwargs)
-    maskcnn_resnet50 = models.detection.maskrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True, **kwargs)
-    keypointrcnn_resnet50 = models.detection.keypointrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=2, num_keypoints=17, pretrained_backbone=True, **kwargs)
+    fasterrcnn_resnet50 = models.detection.fasterrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True)
+    maskcnn_resnet50 = models.detection.maskrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True)
+    keypointrcnn_resnet50 = models.detection.keypointrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=2, num_keypoints=17, pretrained_backbone=True)
 
     ###########################################################################################
     # Semantic Segmentation
 
-    fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
-    fcn_resnet101 = models.segmentation.fcn_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+    fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None)
+    fcn_resnet101 = models.segmentation.fcn_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None)
 
-    deeplabv3_resnet50 = models.segmentation.deeplabv3_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
-    deeplabv3_resnet101 = models.segmentation.deeplabv3_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None, **kwargs)
+    deeplabv3_resnet50 = models.segmentation.deeplabv3_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None)
+    deeplabv3_resnet101 = models.segmentation.deeplabv3_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None)
 
     ###########################################################################################
+    # Generative Adversarial Networks
+
+    
+    ###########################################################################################
+
 
 
     checking_input = True
     while (checking_input):
-        model_type = int(input("Choose the type of model you want:\n1 (Image Classification)\n2 (Video Classification)\n3 (Object Detection)\nInput:\n4 (Semantic Segmentation)\nInput: "))
+        model_type = int(input("Choose the type of model you want:\n1 (Image Classification)\n2 (Video Classification)\n3 (Object Detection)\n4 (Semantic Segmentation)\n5 (GAN)\nInput: "))
         print(model_type)
 
         # Convolutional Neual Networks
@@ -132,12 +141,14 @@ def import_models(download):
 
             return models_dict
 
-        # Fully Connected
+        # Video Classification
         elif model_type == 2:
             checking_input = False
 
             models_dict = {
-
+                "resnet_3d" : resnet_3d,
+                "resnet_mixed_conv" : resnet_mixed_conv,
+                "resnet_2_1D" : resnet_2_1D
             }
             return models_dict
 
@@ -146,7 +157,9 @@ def import_models(download):
             checking_input = False
 
             models_dict = {
-
+                "fasterrcnn_resnet50" : fasterrcnn_resnet50l,
+                "maskcnn_resnet50" : maskcnn_resnet50,
+                "keypointrcnn_resnet50" : keypointrcnn_resnet50
             }
             return models_dict
 
@@ -155,9 +168,22 @@ def import_models(download):
             checking_input = False
 
             models_dict = {
+                "fcn_resnet50" : fcn_resnet50,
+                "fcn_resnet101" : fcn_resnet101,
+                "deeplabv3_resnet50" : deeplabv3_resnet50,
+                "deeplabv3_resnet101" : deeplabv3_resnet101
+            }
+            return models_dict
+
+                # Generative Adversarial Networks
+        elif model_type == 5:
+            checking_input = False
+
+            models_dict = {
 
             }
             return models_dict
+
 
 
         else:

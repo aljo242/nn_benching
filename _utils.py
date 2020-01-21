@@ -17,7 +17,7 @@ def get_default_device():
         return [torch.device('cpu'), None]
 
 
-def to_device(data, device, print_flag):
+def to_device(data, device, print_flag=False):
     """Move tensor(s) to the chosen device"""
     if print_flag:
         print(f"Moving a tensor to device ({device})")
