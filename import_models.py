@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 import torch
 
 #from models_dir.p_s_s.models import duc_hdc, fcn8s, fcn16s, fcn32s, gcn, psp_net, seg_net, u_net
+from efficientnet_pytorch import EfficientNet
 
 
 
@@ -67,6 +68,16 @@ def import_models(download):
     mnasnet0_5 = models.mnasnet0_5(pretrained=download, progress=True)
     #mnasnet0_75 = models.mnasnet0_75(pretrained=download, progress=True)
     #mnasnet1_3 = models.mnasnet1_3(pretrained=download, progress=True)
+
+    efficientnet_b0 = EfficientNet.from_pretrained('efficientnet-b0')
+    efficientnet_b1 = EfficientNet.from_pretrained('efficientnet-b1')
+    efficientnet_b2 = EfficientNet.from_pretrained('efficientnet-b2')
+    efficientnet_b3 = EfficientNet.from_pretrained('efficientnet-b3')
+    efficientnet_b4 = EfficientNet.from_pretrained('efficientnet-b4')
+    efficientnet_b5 = EfficientNet.from_pretrained('efficientnet-b5')
+    efficientnet_b6 = EfficientNet.from_pretrained('efficientnet-b6')
+    efficientnet_b7 = EfficientNet.from_pretrained('efficientnet-b7')
+
 
     ###########################################################################################
     # Video Classification
@@ -136,6 +147,15 @@ def import_models(download):
                 #"mnasnet1_3": mnasnet1_3,
                 "mnasnet0_5": mnasnet0_5,
                 #"mnasnet0_75": mnasnet0_75,
+                "efficientnet_b0" : efficientnet_b0,
+                "efficientnet_b1" : efficientnet_b1,
+                "efficientnet_b2" : efficientnet_b2,
+                "efficientnet_b3" : efficientnet_b3,
+                "efficientnet_b4" : efficientnet_b4,
+                "efficientnet_b5" : efficientnet_b5,
+                "efficientnet_b6" : efficientnet_b6,
+                "efficientnet_b7" : efficientnet_b7
+
             }
             checking_input = False
 

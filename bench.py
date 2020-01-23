@@ -39,9 +39,10 @@ def get_ImageNet(transform):
     #dataset = datasets.ImageNet(root='data/ImageNet/', download=True)
     #test_dataset = datasets.ImageNet(root='data/ImageNet', train=False, transform=transform)
     cwd = os.getcwd()
-    print(cwd)
     test_dir =  cwd + "/data"
-    print(test_dir)
+    print(f"Checking for directory: {test_dir}")    
+    if not os.path.exists(test_dir):
+        os.mkdir(test_dir)
 
     print("Checking if files need to be renamed...")
     for root, subdirs, files in os.walk(test_dir):
@@ -98,6 +99,11 @@ if __name__ == "__main__":
     """
     models_dict = import_models(download)
     [model, model_name]  = select_model(models_dict)
+    cwd = os.getcwd()
+    log_dir =  cwd + "/logs"
+    print(f"Checking for directory: {log_dir}")
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
     logger_name = "logs/" + model_name + '_' + device_name +'.log'
     logging.basicConfig(filename=logger_name,filemode='w', format='%(message)s')
     logging.warning("Beginning Log:...\n")
@@ -144,6 +150,12 @@ if __name__ == "__main__":
     logging.warning(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
 
     onnx_model_name = "onnx/" + model_name + ".onnx"
+    cwd = os.getcwd()
+    onnx_dir =  cwd + "/onnx"
+    print(f"Checking for directory: {onnx_dir}")    
+    if not os.path.exists(onnx_dir):
+        os.mkdir(onnx_dir)
+
     if not os.path.exists(onnx_model_name):
         print(f"Saving Model to onnx format... {onnx_model_name}\n")
         logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
