@@ -3,12 +3,41 @@ from torch.utils import data
 import numpy as np
 import math
 import time
+import platform, socket, sys, psutil
+
+
+def printCPUInfo():
+    print(f"Name: {socket.gethostname()}") 
+    print(f"FQDN: {socket.getfqdn()}")
+    print(f"System Platform: {sys.platform}")
+    print(f"Machine: {platform.machine()}")
+    print(f"Node {platform.node()}")
+    print(f"Platform: {platform.platform()}")
+    print(f"Pocessor: {platform.processor()}")
+    print(f"System OS: {platform.system()}")
+    print(f"Release: {platform.release()}")
+    print(f"Version: {platform.version()}")
+    print(f"Number of CPUs: {str(psutil.cpu_count())}")
+    print(f"Number of Physical CPUs: {str(psutil.cpu_count(logical=False))}\n")
+
+    return platform.processor()
+
+
+def select_device():
+    [device, device_name] = get_default_device() 
+    if (len(sys.argv) > 1):
+        if str(sys.argv[1]) == "-c":
+            device = torch.device("cpu")
+        elif str(sys.argv[1]) == "-g":
+            device = torch.device("cuda")
+
+    return [device, device_name]
 
 
 def get_default_device():
     """Pick GPU if available, else CPU"""
     if torch.cuda.is_available():
-        print("USING GPU:")
+        print("FOUND GPU:")
         print(torch.cuda.get_device_name(torch.device('cuda')))
 
         return [torch.device('cuda'), torch.cuda.get_device_name(torch.device('cuda'))]

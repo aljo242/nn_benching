@@ -4,7 +4,7 @@ import torchvision.datasets as datasets
 from torch.utils.data import DataLoader
 import torch
 
-from models_dir.p_s_s.models import duc_hdc, fcn8s, fcn16s, fcn32s, gcn, psp_net, seg_net, u_net
+#from models_dir.p_s_s.models import duc_hdc, fcn8s, fcn16s, fcn32s, gcn, psp_net, seg_net, u_net
 
 
 
@@ -84,11 +84,11 @@ def import_models(download):
     ###########################################################################################
     # Semantic Segmentation
 
-    fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None)
+    fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=21, aux_loss=None)
     fcn_resnet101 = models.segmentation.fcn_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None)
 
-    deeplabv3_resnet50 = models.segmentation.deeplabv3_resnet50(pretrained=download, progress=True, num_classes=21, aux_loss=None)
-    deeplabv3_resnet101 = models.segmentation.deeplabv3_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None)
+    deeplabv3_resnet50 = models.segmentation.deeplabv3_resnet50(pretrained=False, progress=True, num_classes=21, aux_loss=None)
+    deeplabv3_resnet101 = models.segmentation.deeplabv3_resnet101(pretrained=False, progress=True, num_classes=21, aux_loss=None)
 
     ###########################################################################################
     # Generative Adversarial Networks
@@ -157,7 +157,7 @@ def import_models(download):
             checking_input = False
 
             models_dict = {
-                "fasterrcnn_resnet50" : fasterrcnn_resnet50l,
+                "fasterrcnn_resnet50" : fasterrcnn_resnet50,
                 "maskcnn_resnet50" : maskcnn_resnet50,
                 "keypointrcnn_resnet50" : keypointrcnn_resnet50
             }
