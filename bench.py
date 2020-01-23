@@ -7,10 +7,11 @@ import torch.onnx
 from torchsummary import summary
 from thop import profile
 from import_models import import_models
+import platform, socket, sys, psutil
 
 import time
 import os
-from _utils import split_indices, get_default_device, DeviceDataLoader, to_device, fit, evaluate, accuracy, predict_image
+from _utils import split_indices, get_default_device, DeviceDataLoader, to_device, fit, evaluate, accuracy, predict_image, printCPUInfo, select_device
 import logging
 import statistics
 
@@ -59,14 +60,20 @@ def get_ImageNet(transform):
     return [dataset, test_dataset]
 
 
+
+
+
+
 if __name__ == "__main__":
 
-    [device, device_name] = get_default_device() 
+    [device, device_name] = select_device()
     if device_name == None:
-        device_name = 'CPU'
+        device_name = cpu_name
     cpu = torch.device('cpu') 
-    print(str(device))
+    printCPUInfo()
+    print(f"Computing with: {str(device)}")
     torch.backends.cudnn.benchmark = True
+
 
     BATCH_SIZE = 1
     SHUFFLE = True
