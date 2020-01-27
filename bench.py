@@ -72,7 +72,7 @@ if __name__ == "__main__":
     cpu_name = printCPUInfo()
     if device_name is None:
         device_name = cpu_name
-    print(f"CPU: {str(device_name)}")
+    print(f"CPU: {str(cpu_name)}")
     print(f"Computing with: {str(device)}")
     torch.backends.cudnn.benchmark = True
 
@@ -117,6 +117,14 @@ if __name__ == "__main__":
     	batch_size = BATCH_SIZE, shuffle = SHUFFLE, num_workers = NUM_WORKERS)
     test_loader = DeviceDataLoader(test_loader, device)
 
+    #summary(model, input_size = (3, 224, 224))
+    profile_input = torch.randn(1, 3, 224, 224)
+    # If we are using and EfficientNet variant we need to set activation function
+    # to  not be "memory efficient" to allow ONNX exporting
+    if "efficient" in model_name:
+        profile_input = torch.randn(10, 3, 240, 240)
+        model.set_swish(memory_efficient=False)
+
     model.eval()
     counter = 0
     times = []
@@ -133,8 +141,6 @@ if __name__ == "__main__":
             elif counter == 1: 
                 out = model(xb)
 
-    #summary(model, input_size = (3, 224, 224))
-    profile_input = torch.randn(1, 3, 224, 224)
     to_device(profile_input, cpu, True)
     to_device(model, cpu, True)
     flops, params  = profile(model, inputs =(profile_input,))
@@ -155,12 +161,13 @@ if __name__ == "__main__":
     print(f"Checking for directory: {onnx_dir}")    
     if not os.path.exists(onnx_dir):
         os.mkdir(onnx_dir)
+    model.eval()
 
     if not os.path.exists(onnx_model_name):
+        print(profile_input)
         print(f"Saving Model to onnx format... {onnx_model_name}\n")
         logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
-        torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
-        , input_names = ['input'], output_names = ['output'])
+        torch.onnx.export(model, profile_input, onnx_model_name, verbose = True)
         print(f"successfully Saved!\n")
         logging.warning(f"Successfully Saved!\n")
 
@@ -173,3 +180,7 @@ if __name__ == "__main__":
         print("There was an issue with counting the # of parameters...")
         logging.warning("There was an issue with counting the # of parameters...")
 
+    logging.warning(f"Model is: {model_name}")
+    logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+    logging.warning(f"MEAN IS: {(inf_mean)} ms\n") 
+    logging.warning(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
