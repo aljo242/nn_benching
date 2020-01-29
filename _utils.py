@@ -28,6 +28,7 @@ def select_device():
     if (len(sys.argv) > 1):
         if str(sys.argv[1]) == "-c":
             device = torch.device("cpu")
+            device_name = None
         elif str(sys.argv[1]) == "-g":
             device = torch.device("cuda")
 
