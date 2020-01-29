@@ -7,7 +7,6 @@ import torch.onnx
 from torchsummary import summary
 from thop import profile
 from import_models import import_models
-import platform, socket, sys, psutil
 
 import time
 import os
@@ -39,10 +38,9 @@ def get_ImageNet(transform):
     #dataset = datasets.ImageNet(root='data/ImageNet/', download=True)
     #test_dataset = datasets.ImageNet(root='data/ImageNet', train=False, transform=transform)
     cwd = os.getcwd()
+    print(cwd)
     test_dir =  cwd + "/data"
-    print(f"Checking for directory: {test_dir}")    
-    if not os.path.exists(test_dir):
-        os.mkdir(test_dir)
+    print(test_dir)
 
     print("Checking if files need to be renamed...")
     for root, subdirs, files in os.walk(test_dir):
@@ -68,12 +66,11 @@ def get_ImageNet(transform):
 if __name__ == "__main__":
 
     [device, device_name] = select_device()
-    cpu = torch.device('cpu') 
     cpu_name = printCPUInfo()
-    if device_name is None:
+    if device_name == None:
         device_name = cpu_name
-    print(f"CPU: {str(cpu_name)}")
-    print(f"Computing with: {str(device)}")
+    cpu = torch.device('cpu') 
+    print(f"Computing with: {str(device_name)}")
     torch.backends.cudnn.benchmark = True
 
 
@@ -99,11 +96,6 @@ if __name__ == "__main__":
     """
     models_dict = import_models(download)
     [model, model_name]  = select_model(models_dict)
-    cwd = os.getcwd()
-    log_dir =  cwd + "/logs"
-    print(f"Checking for directory: {log_dir}")
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
     logger_name = "logs/" + model_name + '_' + device_name +'.log'
     logging.basicConfig(filename=logger_name,filemode='w', format='%(message)s')
     logging.warning("Beginning Log:...\n")
@@ -117,18 +109,10 @@ if __name__ == "__main__":
     	batch_size = BATCH_SIZE, shuffle = SHUFFLE, num_workers = NUM_WORKERS)
     test_loader = DeviceDataLoader(test_loader, device)
 
-    #summary(model, input_size = (3, 224, 224))
-    profile_input = torch.randn(1, 3, 224, 224)
-    # If we are using and EfficientNet variant we need to set activation function
-    # to  not be "memory efficient" to allow ONNX exporting
-    if "efficient" in model_name:
-        profile_input = torch.randn(10, 3, 240, 240)
-        model.set_swish(memory_efficient=False)
-
     model.eval()
     counter = 0
     times = []
-    iterations = 2
+    iterations = 1
 
     for i in range(iterations):
         for xb, yb in test_loader:
@@ -141,6 +125,8 @@ if __name__ == "__main__":
             elif counter == 1: 
                 out = model(xb)
 
+    #summary(model, input_size = (3, 224, 224))
+    profile_input = torch.randn(1, 3, 224, 224)
     to_device(profile_input, cpu, True)
     to_device(model, cpu, True)
     flops, params  = profile(model, inputs =(profile_input,))
@@ -156,18 +142,11 @@ if __name__ == "__main__":
     logging.warning(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
 
     onnx_model_name = "onnx/" + model_name + ".onnx"
-    cwd = os.getcwd()
-    onnx_dir =  cwd + "/onnx"
-    print(f"Checking for directory: {onnx_dir}")    
-    if not os.path.exists(onnx_dir):
-        os.mkdir(onnx_dir)
-    model.eval()
-
     if not os.path.exists(onnx_model_name):
-        print(profile_input)
         print(f"Saving Model to onnx format... {onnx_model_name}\n")
         logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
-        torch.onnx.export(model, profile_input, onnx_model_name, verbose = True)
+        torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
+        , input_names = ['input'], output_names = ['output'])
         print(f"successfully Saved!\n")
         logging.warning(f"Successfully Saved!\n")
 
@@ -180,7 +159,3 @@ if __name__ == "__main__":
         print("There was an issue with counting the # of parameters...")
         logging.warning("There was an issue with counting the # of parameters...")
 
-    logging.warning(f"Model is: {model_name}")
-    logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
-    logging.warning(f"MEAN IS: {(inf_mean)} ms\n") 
-    logging.warning(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
