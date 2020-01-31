@@ -143,14 +143,14 @@ if __name__ == "__main__":
         inf_mean = statistics.mean(times)*1000          # convert to ms
         inf_stdev = statistics.stdev(times)*1000        # convert to ms
 
-        onnx_model_name = "onnx/" + model_name + ".onnx"
-        if not os.path.exists(onnx_model_name):
-            print(f"Saving Model to onnx format... {onnx_model_name}\n")
-            logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
-            torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
-                , input_names = ['input'], output_names = ['output'])
-            print(f"successfully Saved!\n")
-            logging.warning(f"Successfully Saved!\n")
+        #onnx_model_name = "onnx/" + model_name + ".onnx"
+        #if not os.path.exists(onnx_model_name):
+        #    print(f"Saving Model to onnx format... {onnx_model_name}\n")
+        #   logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
+        #   torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
+        #        , input_names = ['input'], output_names = ['output'])
+        #    print(f"successfully Saved!\n")
+        #    logging.warning(f"Successfully Saved!\n")
 
         #check parameter counting
         parameters = 0
