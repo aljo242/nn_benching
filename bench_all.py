@@ -10,9 +10,11 @@ from import_models import import_all
 
 import time
 import os
-from _utils import split_indices, get_default_device, DeviceDataLoader, to_device, fit, evaluate, accuracy, predict_image, printCPUInfo, select_device
+from _utils import DeviceDataLoader, to_device, printCPUInfo, select_device
 import logging
 import statistics
+
+from modelstats import get_critical_path
 
 
 
@@ -32,11 +34,11 @@ def select_model(models_dict):
     print(f"Model ({model_name}) did not match any given above. Try again...")
     exit()
 
-
+import numpy as np
 
 def get_ImageNet(transform):
-    #dataset = datasets.ImageNet(root='data/ImageNet/', download=True)
-    #test_dataset = datasets.ImageNet(root='data/ImageNet', train=False, transform=transform)
+    # dataset = datasets.ImageNet(root='data/ImageNet/', download=True)
+    # test_dataset = datasets.ImageNet(root='data/ImageNet', train=False, transform=transform)
     cwd = os.getcwd()
     print(cwd)
     test_dir =  cwd + "/data"
@@ -56,7 +58,6 @@ def get_ImageNet(transform):
     test = datasets.ImageFolder(test_dir, transform)
     return test
 
-    return [dataset, test_dataset]
 
 
 
@@ -69,8 +70,8 @@ if __name__ == "__main__":
     cpu_name = printCPUInfo()
     if device_name == None:
         device_name = cpu_name
-    cpu = torch.device('cpu') 
-    print(f"Computing with: {str(device_name)}")
+    cpu = torch.device('cpu')
+    print(f"Computing with: {str(device_name)}", flush=True)
     torch.backends.cudnn.benchmark = True
 
 
@@ -81,11 +82,11 @@ if __name__ == "__main__":
     download = True # flag to download pretrained weights
 
     transform = transforms.Compose([
-    	transforms.RandomResizedCrop(crop_size),
-    	transforms.RandomHorizontalFlip(),
-    	transforms.ToTensor(),
-    	transforms.Normalize(mean = [ 0.485, 0.456, 0.406 ],
-                         std = [ 0.229, 0.224, 0.225 ]),
+        transforms.RandomResizedCrop(crop_size),
+	    transforms.RandomHorizontalFlip(),
+	    transforms.ToTensor(),
+	    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225]),
     ])
 
     """
@@ -94,26 +95,25 @@ if __name__ == "__main__":
     All models trained on Imagenet (3, 224, 224).  This will be their default input shapes.
     EXCEPT for inception_v3 as noted above.  Will need to be reshaped.
     """
+    test_dataset = get_ImageNet(transform)
+    test_loader = DataLoader(test_dataset,
+       batch_size=BATCH_SIZE, shuffle=SHUFFLE, num_workers=NUM_WORKERS)
     models_dict = import_all(download)
 
-    print(f"LENGHT OF THE DICT IS: {len(models_dict)}")
+    # print(f"LENGHT OF THE DICT IS: {len(models_dict)}")
     for model_name in models_dict:
         model = models_dict[model_name]
     #[model, model_name]  = select_model(models_dict)
         logger_name = "logs/" + 'all_tests_' + device_name +'.log'
-        logging.basicConfig(filename=logger_name,filemode='w', format='%(message)s')
+        logging.basicConfig(filename=logger_name, filemode='w+', format='%(message)s')
         logging.warning("Beginning Log:...\n")
         print(f"Testing: {model_name}\n")
         logging.warning(f"Testing: {model_name}\n")
 
- 
+        device_loader = DeviceDataLoader(test_loader, device)
         to_device(model, device, True)
         # send back to cpu host
         #to_device(model, cpu, True)
-        test_dataset = get_ImageNet(transform)
-        test_loader = DataLoader(test_dataset, 
-    	   batch_size = BATCH_SIZE, shuffle = SHUFFLE, num_workers = NUM_WORKERS)
-        test_loader = DeviceDataLoader(test_loader, device)
 
         model.eval()
         counter = 0
@@ -121,27 +121,49 @@ if __name__ == "__main__":
         iterations = 1
 
         for i in range(iterations):
-            for xb, yb in test_loader:
+            for xb, yb in device_loader:
                 counter += 1
-                print(f"Test #{counter}")
+                print(f"Test #{counter}", flush=True, end='\r')
                 if counter != 1:
                     start_time = time.perf_counter()
                     out = model(xb)
                     times.append((time.perf_counter() - start_time))
-                elif counter == 1: 
+                elif counter == 1:
                     out = model(xb)
+
+                if counter > 10:
+                    break
 
         #   summary(model, input_size = (3, 224, 224))
         profile_input = torch.randn(1, 3, 224, 224)
         to_device(profile_input, cpu, True)
         to_device(model, cpu, True)
-        flops, params  = profile(model, inputs =(profile_input,))
-        print(f"\n\n# of FLOPs: {flops}\n# of Params: {params}")
-        logging.warning(f"Model is: {model_name}")
-        logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+        try:
+            flops, params = profile(model, inputs=(profile_input,))
+            logging.warning(f"\n\nModel is: {model_name}")
+            print(f"# of FLOPs: {flops}\n# of Params: {params}")
+            logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+        except BaseException:
+            print(f"Could not compute model statistics {model_name}")
 
         inf_mean = statistics.mean(times)*1000          # convert to ms
         inf_stdev = statistics.stdev(times)*1000        # convert to ms
+
+        try:
+            critical_path, latencies, sorted_latencies = get_critical_path(model)
+            lat_arr = np.array(sorted_latencies)
+
+            print(f"# Critical Path: {np.max(lat_arr)}")
+            print(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+            print(f"# Avg Node Latency {np.average(lat_arr)}")
+            print(f"# Median Node Latency {np.median(lat_arr)}")
+            logging.warning(f"# Critical Path: {np.max(lat_arr)}")
+            logging.warning(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+            logging.warning(f"# Avg Node Latency: {np.average(lat_arr)}")
+            logging.warning(f"# Median Node Latency: {np.average(lat_arr)}")
+        except BaseException:
+            print("Error getting critical path")
+
 
         #onnx_model_name = "onnx/" + model_name + ".onnx"
         #if not os.path.exists(onnx_model_name):
@@ -161,10 +183,7 @@ if __name__ == "__main__":
             logging.warning("There was an issue with counting the # of parameters...")
 
 
-        print(f"MEAN IS: {(inf_mean)} ms\n")
-        print(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
-        logging.warning(f"MEAN IS: {(inf_mean)} ms\n") 
-        logging.warning(f"STDEV IS: {(inf_stdev)} ms\n\n\n")
-        print(f"\n\n# of FLOPs: {flops}\n# of Params: {params}")
-        logging.warning(f"Model is: {model_name}")
-        logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+        print(f"# Inference Mean: {(inf_mean)} ms")
+        print(f"# Inference Stdev: {(inf_stdev)} ms\n\n\n")
+        logging.warning(f"# Inference Mean: {(inf_mean)} ms")
+        logging.warning(f"# Inference Stdev: {(inf_stdev)} ms\n")
