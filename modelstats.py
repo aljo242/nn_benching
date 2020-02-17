@@ -1,13 +1,11 @@
-import argparse
 import torch
-from torch.hub import load_state_dict_from_url
-from torchsummary import summary
-import numpy as np
-import matplotlib.pyplot as plt
-from torch.autograd import Variable
 INFERENCE_SIZE = (244, 244)
+import sys
 
 def get_model_graph(model):
+
+    OLD_RECURSION_LIMIT = sys.getrecursionlimit()
+    sys.setrecursionlimit(1500)
     dummy_input = torch.randn(1, 3, INFERENCE_SIZE[0], INFERENCE_SIZE[1])
     print("Get model graph")
     dummy_output = model(dummy_input)
@@ -30,7 +28,7 @@ def get_model_graph(model):
         else:
             edges[fromid] = [str(id(t))]
 
-    def add_nodes(var):
+    def add_nodes(var, d=0):
         if var not in seen:
             if torch.is_tensor(var):
                 nodes[str(id(var))] = size_to_str(var.size())
@@ -45,13 +43,22 @@ def get_model_graph(model):
                 for u in var.next_functions:
                     if u[0] is not None:
                         add_edge(u[0], var)
-                        add_nodes(u[0])
+                        if u[0] not in seen:
+                            add_nodes(u[0], d+1)
             if hasattr(var, 'saved_tensors'):
                 for t in var.saved_tensors:
                     add_edge(t, var)
-                    add_nodes(t)
-    add_nodes(dummy_output.grad_fn)
-    print("Model graph complete")
+                    if t not in seen:
+                        add_nodes(t, d+1)
+
+    try:
+        add_nodes(dummy_output.grad_fn)
+    except BaseException:
+        # some models have a weird structure on the output
+        add_nodes(dict(dummy_output)['out'].grad_fn)
+
+    print("Model graph complete", len(edges), len(nodes), flush=True)
+    sys.setrecursionlimit(OLD_RECURSION_LIMIT)
     return nodes, edges
 
 def __topo_sort(edge_lookup, nodeid, visited, stack):
@@ -60,16 +67,16 @@ def __topo_sort(edge_lookup, nodeid, visited, stack):
     for node in node_edges:
         if node not in visited:
             __topo_sort(edge_lookup, node, visited, stack)
-        stack.insert(0, nodeid)
+    stack.insert(0, nodeid)
 
 def topological_sort(e):
-    print("Sort edge map")
+    print("Sort edge map", flush=True)
     visited = {}
     stack = []
     for idx, nodeid in enumerate(e.keys()):
         if nodeid not in visited:
             __topo_sort(e, nodeid, visited, stack)
-    print("Edge map sorted")
+    print("Edge map sorted", flush=True)
     return stack
 
 def get_critical_path(model):

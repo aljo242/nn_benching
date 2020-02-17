@@ -280,24 +280,24 @@ def import_all(download):
     efficientnet_b5 = EfficientNet.from_pretrained('efficientnet-b5')
     efficientnet_b6 = EfficientNet.from_pretrained('efficientnet-b6')
     efficientnet_b7 = EfficientNet.from_pretrained('efficientnet-b7')
-
-
-    ###########################################################################################
-    # Video Classification
-    # resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
-    # resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
-    # resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
-
-    ###########################################################################################
-    # Object Detection
-
+    #
+    #
+    # ###########################################################################################
+    # # Video Classification
+    # # resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
+    # # resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
+    # # resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
+    #
+    # ###########################################################################################
+    # # Object Detection
+    #
     fasterrcnn_resnet50 = models.detection.fasterrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True)
     maskcnn_resnet50 = models.detection.maskrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=91, pretrained_backbone=True)
     keypointrcnn_resnet50 = models.detection.keypointrcnn_resnet50_fpn(pretrained=download, progress=True, num_classes=2, num_keypoints=17, pretrained_backbone=True)
-
-    ###########################################################################################
-    # Semantic Segmentation
-
+    #
+    # ###########################################################################################
+    # # Semantic Segmentation
+    #
     fcn_resnet50 = models.segmentation.fcn_resnet50(pretrained=False, progress=True, num_classes=21, aux_loss=None)
     fcn_resnet101 = models.segmentation.fcn_resnet101(pretrained=download, progress=True, num_classes=21, aux_loss=None)
 
@@ -310,11 +310,11 @@ def import_all(download):
 
     ###########################################################################################
     models_dict = {
+        "alexnet" : alexnet,
         "fcn_resnet50" : fcn_resnet50,
         "fcn_resnet101" : fcn_resnet101,
         "deeplabv3_resnet50" : deeplabv3_resnet50,
         "deeplabv3_resnet101" : deeplabv3_resnet101,
-        "alexnet" : alexnet,
         "squeezenet1_0" : squeezenet1_0,
         "squeezenet1_1": squeezenet1_1,
         "vgg16" : vgg16,
@@ -351,7 +351,7 @@ def import_all(download):
         "efficientnet_b4" : efficientnet_b4,
         "efficientnet_b5" : efficientnet_b5,
         "efficientnet_b6" : efficientnet_b6,
-        "efficientnet_b7" : efficientnet_b7
+        "efficientnet_b7" : efficientnet_b7,
      }
      # "maskcnn_resnet50" : maskcnn_resnet50,
      # "keypointrcnn_resnet50" : keypointrcnn_resnet50,

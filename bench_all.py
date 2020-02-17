@@ -45,7 +45,7 @@ def get_ImageNet(transform):
     print(test_dir)
 
     print("Checking if files need to be renamed...")
-    for root, subdirs, files in os.walk(test_dir):
+    for root, _, files in os.walk(test_dir):
         for file in files:
             if os.path.splitext(file)[1] in ( '.JPEG', ".JPG"):
                 og = os.path.join(root, file)
@@ -57,11 +57,6 @@ def get_ImageNet(transform):
 
     test = datasets.ImageFolder(test_dir, transform)
     return test
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -105,8 +100,8 @@ if __name__ == "__main__":
         model = models_dict[model_name]
     #[model, model_name]  = select_model(models_dict)
         logger_name = "logs/" + 'all_tests_' + device_name +'.log'
-        logging.disable(logging.ERROR)
-        logging.basicConfig(filename=logger_name, filemode='w', format='%(message)s')
+        logging.disable(logging.INFO)
+        logging.basicConfig(filename=logger_name, filemode='w+', format='%(message)s')
         logging.warning("Beginning Log:...\n")
         print(f"Testing: {model_name}\n", flush=True)
         logging.warning(f"Testing: {model_name}\n")
@@ -147,34 +142,20 @@ if __name__ == "__main__":
         except RuntimeError:
             print(f"Could not compute model statistics {model_name}")
 
-        try:
-            profile_input = torch.randn(64, 3, 3, 7, 7)
-            to_device(profile_input, cpu, True)
-            to_device(model, cpu, True)
-            flops, params = profile(model, inputs=(profile_input,))
-            logging.warning(f"\n\nModel is: {model_name}")
-            print(f"# of FLOPs: {flops}\n# of Params: {params}")
-            logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
-        except RuntimeError:
-            print(f"Could not compute model statistics {model_name}")
-
         inf_mean = statistics.mean(times)*1000          # convert to ms
         inf_stdev = statistics.stdev(times)*1000        # convert to ms
 
-        try:
-            critical_path, latencies, sorted_latencies = get_critical_path(model)
-            lat_arr = np.array(sorted_latencies)
+        critical_path, latencies, sorted_latencies = get_critical_path(model)
+        lat_arr = np.array(sorted_latencies)
 
-            print(f"# Critical Path: {np.max(lat_arr)}")
-            print(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
-            print(f"# Avg Node Latency {np.average(lat_arr)}")
-            print(f"# Median Node Latency {np.median(lat_arr)}")
-            logging.warning(f"# Critical Path: {np.max(lat_arr)}")
-            logging.warning(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
-            logging.warning(f"# Avg Node Latency: {np.average(lat_arr)}")
-            logging.warning(f"# Median Node Latency: {np.average(lat_arr)}")
-        except BaseException:
-            print("Error getting critical path")
+        print(f"# Critical Path: {np.max(lat_arr)}")
+        print(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+        print(f"# Avg Node Latency {np.average(lat_arr)}")
+        print(f"# Median Node Latency {np.median(lat_arr)}")
+        logging.warning(f"# Critical Path: {np.max(lat_arr)}")
+        logging.warning(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+        logging.warning(f"# Avg Node Latency: {np.average(lat_arr)}")
+        logging.warning(f"# Median Node Latency: {np.average(lat_arr)}")
 
 
         #onnx_model_name = "onnx/" + model_name + ".onnx"
