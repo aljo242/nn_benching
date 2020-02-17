@@ -1,0 +1,7 @@
+numpy
+torch===1.4.0
+torchvision
+torchsummary
+thop
+psutil
+matplotlib
