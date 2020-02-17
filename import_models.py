@@ -82,9 +82,9 @@ def import_models(download):
 
     ###########################################################################################
     # Video Classification
-    resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
-    resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
-    resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
+    # resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
+    # resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
+    # resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
 
     ###########################################################################################
     # Object Detection
@@ -284,9 +284,9 @@ def import_all(download):
 
     ###########################################################################################
     # Video Classification
-    resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
-    resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
-    resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
+    # resnet_3d = models.video.r3d_18(pretrained=download, progress=True)
+    # resnet_mixed_conv = models.video.mc3_18(pretrained=download, progress=True)
+    # resnet_2_1D = models.video.r2plus1d_18(pretrained=download, progress=True)
 
     ###########################################################################################
     # Object Detection
@@ -348,9 +348,6 @@ def import_all(download):
         "efficientnet_b5" : efficientnet_b5,
         "efficientnet_b6" : efficientnet_b6,
         "efficientnet_b7" : efficientnet_b7,
-        "resnet_3d" : resnet_3d,
-        "resnet_mixed_conv" : resnet_mixed_conv,
-        "resnet_2_1D" : resnet_2_1D,
         "fasterrcnn_resnet50" : fasterrcnn_resnet50,
         "maskcnn_resnet50" : maskcnn_resnet50,
         "keypointrcnn_resnet50" : keypointrcnn_resnet50,
@@ -359,4 +356,7 @@ def import_all(download):
         "deeplabv3_resnet50" : deeplabv3_resnet50,
         "deeplabv3_resnet101" : deeplabv3_resnet101,
      }
+     # "resnet_3d" : resnet_3d,
+     # "resnet_mixed_conv" : resnet_mixed_conv,
+     # "resnet_2_1D" : resnet_2_1D,
     return models_dict

@@ -105,9 +105,10 @@ if __name__ == "__main__":
         model = models_dict[model_name]
     #[model, model_name]  = select_model(models_dict)
         logger_name = "logs/" + 'all_tests_' + device_name +'.log'
-        logging.basicConfig(filename=logger_name, filemode='w+', format='%(message)s')
+        logging.disable(logging.ERROR)
+        logging.basicConfig(filename=logger_name, filemode='w', format='%(message)s')
         logging.warning("Beginning Log:...\n")
-        print(f"Testing: {model_name}\n")
+        print(f"Testing: {model_name}\n", flush=True)
         logging.warning(f"Testing: {model_name}\n")
 
         device_loader = DeviceDataLoader(test_loader, device)
@@ -123,7 +124,7 @@ if __name__ == "__main__":
         for i in range(iterations):
             for xb, yb in device_loader:
                 counter += 1
-                print(f"Test #{counter}", flush=True, end='\r')
+                print(f"Test {counter}", flush=True, end='\r')
                 if counter != 1:
                     start_time = time.perf_counter()
                     out = model(xb)
@@ -131,19 +132,30 @@ if __name__ == "__main__":
                 elif counter == 1:
                     out = model(xb)
 
-                if counter > 10:
+                if counter > 2:
                     break
 
         #   summary(model, input_size = (3, 224, 224))
-        profile_input = torch.randn(1, 3, 224, 224)
-        to_device(profile_input, cpu, True)
-        to_device(model, cpu, True)
         try:
+            profile_input = torch.randn(1, 3, 224, 224)
+            to_device(profile_input, cpu, True)
+            to_device(model, cpu, True)
             flops, params = profile(model, inputs=(profile_input,))
             logging.warning(f"\n\nModel is: {model_name}")
             print(f"# of FLOPs: {flops}\n# of Params: {params}")
             logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
-        except BaseException:
+        except RuntimeError:
+            print(f"Could not compute model statistics {model_name}")
+
+        try:
+            profile_input = torch.randn(64, 3, 3, 7, 7)
+            to_device(profile_input, cpu, True)
+            to_device(model, cpu, True)
+            flops, params = profile(model, inputs=(profile_input,))
+            logging.warning(f"\n\nModel is: {model_name}")
+            print(f"# of FLOPs: {flops}\n# of Params: {params}")
+            logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+        except RuntimeError:
             print(f"Could not compute model statistics {model_name}")
 
         inf_mean = statistics.mean(times)*1000          # convert to ms
