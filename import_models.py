@@ -310,6 +310,12 @@ def import_all(download):
 
     ###########################################################################################
     models_dict = {
+        "maskcnn_resnet50" : maskcnn_resnet50,
+        "keypointrcnn_resnet50" : keypointrcnn_resnet50,
+        "fcn_resnet50" : fcn_resnet50,
+        "fcn_resnet101" : fcn_resnet101,
+        "deeplabv3_resnet50" : deeplabv3_resnet50,
+        "deeplabv3_resnet101" : deeplabv3_resnet101,
         "alexnet" : alexnet,
         "squeezenet1_0" : squeezenet1_0,
         "squeezenet1_1": squeezenet1_1,
@@ -347,15 +353,9 @@ def import_all(download):
         "efficientnet_b4" : efficientnet_b4,
         "efficientnet_b5" : efficientnet_b5,
         "efficientnet_b6" : efficientnet_b6,
-        "efficientnet_b7" : efficientnet_b7,
-        "fasterrcnn_resnet50" : fasterrcnn_resnet50,
-        "maskcnn_resnet50" : maskcnn_resnet50,
-        "keypointrcnn_resnet50" : keypointrcnn_resnet50,
-        "fcn_resnet50" : fcn_resnet50,
-        "fcn_resnet101" : fcn_resnet101,
-        "deeplabv3_resnet50" : deeplabv3_resnet50,
-        "deeplabv3_resnet101" : deeplabv3_resnet101,
+        "efficientnet_b7" : efficientnet_b7
      }
+     # "fasterrcnn_resnet50" : fasterrcnn_resnet50,
      # "resnet_3d" : resnet_3d,
      # "resnet_mixed_conv" : resnet_mixed_conv,
      # "resnet_2_1D" : resnet_2_1D,
