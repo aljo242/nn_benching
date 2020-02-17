@@ -10,7 +10,7 @@ from efficientnet_pytorch import EfficientNet
 
 
 def import_models(download):
-    
+
     """
     Commented out models do not have pre-trained variants available.
 
@@ -18,12 +18,12 @@ def import_models(download):
 
     On CRC we can just run this initially as its own python script to download and cache the models.
 
-    Afterwards, this function will be implemented into some other testing code that will call it in 
+    Afterwards, this function will be implemented into some other testing code that will call it in
     a similar fashion to what is shown below.
     """
 
     print("Loading or checking if models are cached...\n")
-    print("This may take a while.  Progress will be shown if models are being downloaded.\n ")
+    print("This may take a while.  Progress will be shown if models are being downloaded.\n ", flush=True)
 
     ############################################################################################
     # Image Classification
@@ -68,6 +68,7 @@ def import_models(download):
     mnasnet0_5 = models.mnasnet0_5(pretrained=download, progress=True)
     #mnasnet0_75 = models.mnasnet0_75(pretrained=download, progress=True)
     #mnasnet1_3 = models.mnasnet1_3(pretrained=download, progress=True)
+    print("Checking efficientnet", flush=True)
 
     efficientnet_b0 = EfficientNet.from_pretrained('efficientnet-b0')
     efficientnet_b1 = EfficientNet.from_pretrained('efficientnet-b1')
@@ -104,7 +105,7 @@ def import_models(download):
     ###########################################################################################
     # Generative Adversarial Networks
 
-    
+
     ###########################################################################################
 
 
@@ -212,7 +213,7 @@ def import_models(download):
 
 
 def import_all(download):
-    
+
     """
     Commented out models do not have pre-trained variants available.
 
@@ -220,7 +221,7 @@ def import_all(download):
 
     On CRC we can just run this initially as its own python script to download and cache the models.
 
-    Afterwards, this function will be implemented into some other testing code that will call it in 
+    Afterwards, this function will be implemented into some other testing code that will call it in
     a similar fashion to what is shown below.
     """
 
@@ -306,7 +307,7 @@ def import_all(download):
     ###########################################################################################
     # Generative Adversarial Networks
 
-    
+
     ###########################################################################################
     models_dict = {
         "alexnet" : alexnet,
