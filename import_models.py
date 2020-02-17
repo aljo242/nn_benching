@@ -310,8 +310,6 @@ def import_all(download):
 
     ###########################################################################################
     models_dict = {
-        "maskcnn_resnet50" : maskcnn_resnet50,
-        "keypointrcnn_resnet50" : keypointrcnn_resnet50,
         "fcn_resnet50" : fcn_resnet50,
         "fcn_resnet101" : fcn_resnet101,
         "deeplabv3_resnet50" : deeplabv3_resnet50,
@@ -355,6 +353,8 @@ def import_all(download):
         "efficientnet_b6" : efficientnet_b6,
         "efficientnet_b7" : efficientnet_b7
      }
+     # "maskcnn_resnet50" : maskcnn_resnet50,
+     # "keypointrcnn_resnet50" : keypointrcnn_resnet50,
      # "fasterrcnn_resnet50" : fasterrcnn_resnet50,
      # "resnet_3d" : resnet_3d,
      # "resnet_mixed_conv" : resnet_mixed_conv,

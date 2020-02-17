@@ -1,6 +1,6 @@
 numpy
 torch===1.4.0
-torchvision
+torchvision===0.4.1
 torchsummary
 thop
 psutil
