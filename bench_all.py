@@ -67,7 +67,7 @@ if __name__ == "__main__":
     if device_name == None:
         device_name = cpu_name
     cpu = torch.device('cpu')
-    print(f"Computing with: {str(device_name)}", flush=True)
+    print(f"Computing with: {str(cpu_name)}", flush=True)
     torch.backends.cudnn.benchmark = True
     device = torch.device('cpu')
 
@@ -129,6 +129,9 @@ if __name__ == "__main__":
                     times.append((time.perf_counter() - start_time))
                 elif counter == 1:
                     out = model(xb)
+
+                if counter > 100:
+                    break
 
         #   summary(model, input_size = (3, 224, 224))
         try:
