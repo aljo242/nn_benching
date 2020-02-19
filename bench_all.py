@@ -62,14 +62,18 @@ def get_ImageNet(transform):
 
 if __name__ == "__main__":
 
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
     [device, device_name] = select_device()
     cpu_name = printCPUInfo()
-    if device_name == None:
-        device_name = cpu_name
-    cpu = torch.device('cpu')
-    print(f"Computing with: {str(cpu_name)}", flush=True)
-    torch.backends.cudnn.benchmark = True
     device = torch.device('cpu')
+    device_name = None
+    if device_name == None:
+        device_name = cpu_name.replace(' ', '_')
+    cpu = torch.device('cpu')
+    print(f"Computing with: {str(device_name)}", flush=True)
+    torch.backends.cudnn.benchmark = True
 
 
     BATCH_SIZE = 1
@@ -99,15 +103,19 @@ if __name__ == "__main__":
 
     # print(f"LENGHT OF THE DICT IS: {len(models_dict)}")
     Path("logs").mkdir(parents=True, exist_ok=True)
+    print("Device: ", device_name)
+    print("model_name,flops,params,cdl,avg_lat,med_lat,inf_mean,inf_stdev")
+    logger_name = "logs/" + 'all_tests_' + device_name +'.log'
+    logging.basicConfig(filename=logger_name, filemode='w', format='%(message)s')
+    logging.disable(logging.INFO)
+    logging.info("Beginning Log:...\n")
+    logging.warning("model_name,flops,params,cdl,avg_lat,med_lat,inf_mean,inf_stdev")
+
     for model_name in models_dict:
         model = models_dict[model_name]
     #[model, model_name]  = select_model(models_dict)
-        logger_name = "logs/" + 'all_tests_' + device_name +'.log'
-        logging.disable(logging.INFO)
-        logging.basicConfig(filename=logger_name, filemode='w', format='%(message)s')
-        logging.warning("Beginning Log:...\n")
         print(f"Testing: {model_name}\n", flush=True)
-        logging.warning(f"Testing: {model_name}\n")
+        logging.info(f"Testing: {model_name}\n")
 
         device_loader = DeviceDataLoader(test_loader, device)
         to_device(model, device, True)
@@ -130,7 +138,7 @@ if __name__ == "__main__":
                 elif counter == 1:
                     out = model(xb)
 
-                if counter > 100:
+                if counter > 20:
                     break
 
         #   summary(model, input_size = (3, 224, 224))
@@ -139,9 +147,9 @@ if __name__ == "__main__":
             to_device(profile_input, cpu, True)
             to_device(model, cpu, True)
             flops, params = profile(model, inputs=(profile_input,))
-            logging.warning(f"\n\nModel: {model_name}")
+            logging.info(f"\n\nModel: {model_name}")
             print(f"# FLOPs: {flops}\n# Params: {params}")
-            logging.warning(f"# FLOPs: {flops}\n# Params: {params}\n")
+            logging.info(f"# FLOPs: {flops}\n# Params: {params}\n")
         except RuntimeError:
             print(f"Could not compute model statistics {model_name}")
 
@@ -151,22 +159,26 @@ if __name__ == "__main__":
         critical_path, latencies, sorted_latencies = get_critical_path(model)
         lat_arr = np.array(sorted_latencies)
 
+        cdl = np.max(lat_arr)
+        avg_lat = np.average(lat_arr)
+        med_lat = np.median(lat_arr)
+
         print(f"# CDL: {np.max(lat_arr)}")
         print(f"# Avg Node Latency {np.average(lat_arr)}")
         print(f"# Median Node Latency {np.median(lat_arr)}")
-        logging.warning(f"# CDL: {np.max(lat_arr)}")
-        logging.warning(f"# Avg Node Latency: {np.average(lat_arr)}")
-        logging.warning(f"# Median Node Latency: {np.average(lat_arr)}")
+        logging.info(f"# CDL: {np.max(lat_arr)}")
+        logging.info(f"# Avg Node Latency: {np.average(lat_arr)}")
+        logging.info(f"# Median Node Latency: {np.average(lat_arr)}")
 
 
         #onnx_model_name = "onnx/" + model_name + ".onnx"
         #if not os.path.exists(onnx_model_name):
         #    print(f"Saving Model to onnx format... {onnx_model_name}\n")
-        #   logging.warning(f"Saving Model to onnx format... {onnx_model_name}\n")
+        #   logging.info(f"Saving Model to onnx format... {onnx_model_name}\n")
         #   torch.onnx.export(model, profile_input, onnx_model_name, verbose = False, export_params = True, opset_version=11
         #        , input_names = ['input'], output_names = ['output'])
         #    print(f"successfully Saved!\n")
-        #    logging.warning(f"Successfully Saved!\n")
+        #    logging.info(f"Successfully Saved!\n")
 
         #check parameter counting
         parameters = 0
@@ -174,10 +186,13 @@ if __name__ == "__main__":
             parameters += int(p.numel())
         if parameters != params:
             print("There was an issue with counting the # of parameters...")
-            logging.warning("There was an issue with counting the # of parameters...")
+            logging.info("There was an issue with counting the # of parameters...")
 
 
         print(f"# Inference Mean: {(inf_mean)}")
         print(f"# Inference Stdev: {(inf_stdev)}\n\n\n")
-        logging.warning(f"# Inference Mean: {(inf_mean)}")
-        logging.warning(f"# Inference Stdev: {(inf_stdev)}\n")
+        logging.info(f"# Inference Mean: {(inf_mean)}")
+        logging.info(f"# Inference Stdev: {(inf_stdev)}\n")
+        logging.info(f"# Inference Stdev: {(inf_stdev)}\n")
+        print(f"{model_name},{flops},{params},{cdl},{avg_lat},{med_lat},{inf_mean},{inf_stdev}")
+        logging.warning(f"{model_name},{flops},{params},{cdl},{avg_lat},{med_lat},{inf_mean},{inf_stdev}")
