@@ -7,7 +7,6 @@ def get_model_graph(model):
     OLD_RECURSION_LIMIT = sys.getrecursionlimit()
     sys.setrecursionlimit(1500)
     dummy_input = torch.randn(1, 3, INFERENCE_SIZE[0], INFERENCE_SIZE[1])
-    print("Get model graph")
     dummy_output = model(dummy_input)
     params = model.state_dict()
     param_map = {id(v): k for k, v in params.items()}
@@ -57,7 +56,7 @@ def get_model_graph(model):
         # some models have a weird structure on the output
         add_nodes(dict(dummy_output)['out'].grad_fn)
 
-    print("Model graph complete", len(edges), len(nodes), flush=True)
+    # print("Model graph complete", len(edges), len(nodes), flush=True)
     sys.setrecursionlimit(OLD_RECURSION_LIMIT)
     return nodes, edges
 
@@ -70,13 +69,13 @@ def __topo_sort(edge_lookup, nodeid, visited, stack):
     stack.insert(0, nodeid)
 
 def topological_sort(e):
-    print("Sort edge map", flush=True)
+    # print("Sort edge map", flush=True)
     visited = {}
     stack = []
     for idx, nodeid in enumerate(e.keys()):
         if nodeid not in visited:
             __topo_sort(e, nodeid, visited, stack)
-    print("Edge map sorted", flush=True)
+    # print("Edge map sorted", flush=True)
     return stack
 
 def get_critical_path(model):
@@ -92,5 +91,3 @@ def get_critical_path(model):
             edge_latency = latencies[edge] if edge in latencies else 0
             latencies[edge] = max(edge_latency, latencies[node] + 1)
     return max(latencies.values()), latencies, [latencies[k] for k in from_nodes_sorted]
-
-
