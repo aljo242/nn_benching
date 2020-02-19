@@ -1,7 +1,8 @@
 numpy
-torch===1.4.0
-torchvision===0.4.1
+torch===1.4.0 -f https://download.pytorch.org/whl/torch_stable.html
+torchvision
 torchsummary
 thop
 psutil
 matplotlib
+efficientnet_pytorch

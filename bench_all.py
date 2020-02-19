@@ -7,6 +7,7 @@ import torch.onnx
 from torchsummary import summary
 from thop import profile
 from import_models import import_all
+from pathlib import Path
 
 import time
 import os
@@ -68,6 +69,7 @@ if __name__ == "__main__":
     cpu = torch.device('cpu')
     print(f"Computing with: {str(device_name)}", flush=True)
     torch.backends.cudnn.benchmark = True
+    device = torch.device('cpu')
 
 
     BATCH_SIZE = 1
@@ -96,12 +98,13 @@ if __name__ == "__main__":
     models_dict = import_all(download)
 
     # print(f"LENGHT OF THE DICT IS: {len(models_dict)}")
+    Path("logs").mkdir(parents=True, exist_ok=True)
     for model_name in models_dict:
         model = models_dict[model_name]
     #[model, model_name]  = select_model(models_dict)
         logger_name = "logs/" + 'all_tests_' + device_name +'.log'
         logging.disable(logging.INFO)
-        logging.basicConfig(filename=logger_name, filemode='w+', format='%(message)s')
+        logging.basicConfig(filename=logger_name, filemode='w', format='%(message)s')
         logging.warning("Beginning Log:...\n")
         print(f"Testing: {model_name}\n", flush=True)
         logging.warning(f"Testing: {model_name}\n")
@@ -127,18 +130,15 @@ if __name__ == "__main__":
                 elif counter == 1:
                     out = model(xb)
 
-                if counter > 2:
-                    break
-
         #   summary(model, input_size = (3, 224, 224))
         try:
             profile_input = torch.randn(1, 3, 224, 224)
             to_device(profile_input, cpu, True)
             to_device(model, cpu, True)
             flops, params = profile(model, inputs=(profile_input,))
-            logging.warning(f"\n\nModel is: {model_name}")
-            print(f"# of FLOPs: {flops}\n# of Params: {params}")
-            logging.warning(f"# of FLOPs: {flops}\n# of Params: {params}\n")
+            logging.warning(f"\n\nModel: {model_name}")
+            print(f"# FLOPs: {flops}\n# Params: {params}")
+            logging.warning(f"# FLOPs: {flops}\n# Params: {params}\n")
         except RuntimeError:
             print(f"Could not compute model statistics {model_name}")
 
@@ -148,12 +148,10 @@ if __name__ == "__main__":
         critical_path, latencies, sorted_latencies = get_critical_path(model)
         lat_arr = np.array(sorted_latencies)
 
-        print(f"# Critical Path: {np.max(lat_arr)}")
-        print(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+        print(f"# CDL: {np.max(lat_arr)}")
         print(f"# Avg Node Latency {np.average(lat_arr)}")
         print(f"# Median Node Latency {np.median(lat_arr)}")
-        logging.warning(f"# Critical Path: {np.max(lat_arr)}")
-        logging.warning(f"# Min CP: {np.min(lat_arr[np.nonzero(lat_arr)])}")
+        logging.warning(f"# CDL: {np.max(lat_arr)}")
         logging.warning(f"# Avg Node Latency: {np.average(lat_arr)}")
         logging.warning(f"# Median Node Latency: {np.average(lat_arr)}")
 
@@ -176,7 +174,7 @@ if __name__ == "__main__":
             logging.warning("There was an issue with counting the # of parameters...")
 
 
-        print(f"# Inference Mean: {(inf_mean)} ms")
-        print(f"# Inference Stdev: {(inf_stdev)} ms\n\n\n")
-        logging.warning(f"# Inference Mean: {(inf_mean)} ms")
-        logging.warning(f"# Inference Stdev: {(inf_stdev)} ms\n")
+        print(f"# Inference Mean: {(inf_mean)}")
+        print(f"# Inference Stdev: {(inf_stdev)}\n\n\n")
+        logging.warning(f"# Inference Mean: {(inf_mean)}")
+        logging.warning(f"# Inference Stdev: {(inf_stdev)}\n")
